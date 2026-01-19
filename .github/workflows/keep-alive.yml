@@ -1,0 +1,22 @@
+name: Keep Supabase Alive
+
+on:
+  schedule:
+    # 每天 UTC 时间 00:00 运行一次 (北京时间早上 8:00)
+    - cron: "0 0 * * *"
+  workflow_dispatch: # 允许手动触发
+
+jobs:
+  ping-database:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Keep-Alive Endpoint
+        run: |
+          # 请在 GitHub 仓库的 Settings > Secrets and variables > Actions 中配置 APP_URL
+          # 例如: https://your-project.vercel.app
+          if [ -n "${{ secrets.APP_URL }}" ]; then
+            curl -f "${{ secrets.APP_URL }}/api/keep-alive"
+            echo "Successfully pinged database."
+          else
+            echo "APP_URL secret is not set. Skipping ping."
+          fi
