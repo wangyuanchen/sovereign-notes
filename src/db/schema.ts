@@ -24,11 +24,12 @@ export const todos = pgTable("todos", {
   nextRun: timestamp("next_run"),
 });
 
-// 用户表（可选，Clerk 已经管理用户）
+// 用户表
 export const users = pgTable("users", {
   id: varchar("id", { length: 255 }).primaryKey(), // Clerk ID
   email: varchar("email", { length: 255 }),
-  plan: varchar("plan", { length: 50 }).default("free"), // 'free' 或 'pro'
-  stripeCustomerId: varchar("stripe_customer_id", { length: 255 }),
-  stripeSubscriptionId: varchar("stripe_subscription_id", { length: 255 }),
+  plan: varchar("plan", { length: 50 }).default("free"), // 'free', 'pro', 'early_bird'
+  subscriptionStatus: varchar("subscription_status", { length: 50 }).default("inactive"), // 'active', 'inactive', 'expired'
+  subscriptionEndsAt: timestamp("subscription_ends_at"),
+  walletAddress: varchar("wallet_address", { length: 255 }), // Web3 支付钱包地址
 });

@@ -1,35 +1,136 @@
-// 派生密钥的核心函数
-async function deriveKey(password: string, salt: Uint8Array) {
-  const encoder = new TextEncoder();
-  const baseKey = await window.crypto.subtle.importKey(
-    "raw", encoder.encode(password), "PBKDF2", false, ["deriveKey"]
+export async function generateKey(password: string, salt: string) {
+  const enc = new TextEncoder();
+  const keyMaterial = await window.crypto.subtle.importKey(
+    "raw",
+    enc.encode(password),
+    { name: "PBKDF2" },
+    false,
+    ["deriveKey"]
   );
-  return window.crypto.subtle.deriveKey(
-    { name: "PBKDF2", salt, iterations: 100000, hash: "SHA-256" },
-    baseKey, { name: "AES-GCM", length: 256 }, false, ["decrypt", "encrypt"]
+
+  const key = await window.crypto.subtle.deriveKey(
+    {
+      name: "PBKDF2",
+      salt: enc.encode(salt),
+      iterations: 100000,
+      hash: "SHA-256",
+    },
+    keyMaterial,
+    { name: "AES-GCM", length: 256 },
+    false,
+    ["encrypt", "decrypt"]
   );
+
+  return key;
 }
 
-// 解密函数
-export async function decryptData(
-  encryptedBase64: string, 
-  ivBase64: string, 
-  password: string,
-  saltBase64: string // 每个用户或每条笔记应该有一个 salt，这里假设存了 salt
-) {
+export async function encryptData(text: string, password: string) {
   try {
-    const ciphertext = Uint8Array.from(atob(encryptedBase64), c => c.charCodeAt(0));
-    const iv = Uint8Array.from(atob(ivBase64), c => c.charCodeAt(0));
-    const salt = Uint8Array.from(atob(saltBase64), c => c.charCodeAt(0));
+    const salt = window.crypto.randomUUID(); // 每个笔记唯一的盐会更安全，这里简化为随机盐存在记录里
+    const key = await generateKey(password, salt); // 实际生产中盐应该固定或存储
+    // 为了简化 MVP，我们暂且用固定盐或者随密文存储盐。
+    // 正确的做法：生成一个随机 IV 和随机 Salt，存下来。
 
-    const key = await deriveKey(password, salt);
+    // 重新设计：encrypt 返回 { cipher, iv, salt }
+    const iv = window.crypto.getRandomValues(new Uint8Array(12));
+    const finalSalt = window.crypto.getRandomValues(new Uint8Array(16));
+
+    // Generate key from password and salt
+    const enc = new TextEncoder();
+    const keyMaterial = await window.crypto.subtle.importKey(
+      "raw",
+      enc.encode(password),
+      { name: "PBKDF2" },
+      false,
+      ["deriveKey"]
+    );
+
+    const cryptoKey = await window.crypto.subtle.deriveKey(
+      {
+        name: "PBKDF2",
+        salt: finalSalt,
+        iterations: 100000,
+        hash: "SHA-256",
+      },
+      keyMaterial,
+      { name: "AES-GCM", length: 256 },
+      false,
+      ["encrypt", "decrypt"]
+    );
+
+    const encrypted = await window.crypto.subtle.encrypt(
+      {
+        name: "AES-GCM",
+        iv: iv,
+      },
+      cryptoKey,
+      enc.encode(text)
+    );
+
+    // Convert buffers to base64 strings for storage
+    return {
+      encryptedContent: btoa(String.fromCharCode(...new Uint8Array(encrypted))),
+      iv: btoa(String.fromCharCode(...new Uint8Array(iv))),
+      salt: btoa(String.fromCharCode(...new Uint8Array(finalSalt)))
+    };
+  } catch (e) {
+    console.error("Encryption failed:", e);
+    throw e;
+  }
+}
+
+export async function decryptData(encryptedContent: string, ivStr: string, saltStr: string, password: string) {
+  try {
+    const enc = new TextEncoder();
+
+    // Helper to validate and decode base64
+    const safeDecode = (str: string, name: string) => {
+      try {
+        return atob(str);
+      } catch (e) {
+        throw new Error(`Invalid Base64 string for ${name}. Length: ${str?.length}`);
+      }
+    };
+
+    // Decode base64 strings
+    const encryptedData = new Uint8Array(safeDecode(encryptedContent, 'content').split('').map(c => c.charCodeAt(0)));
+    const iv = new Uint8Array(safeDecode(ivStr, 'IV').split('').map(c => c.charCodeAt(0)));
+    const salt = new Uint8Array(safeDecode(saltStr, 'salt').split('').map(c => c.charCodeAt(0)));
+
+    const keyMaterial = await window.crypto.subtle.importKey(
+      "raw",
+      enc.encode(password),
+      { name: "PBKDF2" },
+      false,
+      ["deriveKey"]
+    );
+
+    const cryptoKey = await window.crypto.subtle.deriveKey(
+      {
+        name: "PBKDF2",
+        salt: salt,
+        iterations: 100000,
+        hash: "SHA-256",
+      },
+      keyMaterial,
+      { name: "AES-GCM", length: 256 },
+      false,
+      ["encrypt", "decrypt"]
+    );
 
     const decrypted = await window.crypto.subtle.decrypt(
-      { name: "AES-GCM", iv }, key, ciphertext
+      {
+        name: "AES-GCM",
+        iv: iv,
+      },
+      cryptoKey,
+      encryptedData
     );
 
     return new TextDecoder().decode(decrypted);
   } catch (e) {
-    throw new Error("解密失败，密码可能错误");
+    console.error("Decryption failed:", e);
+    // 这里经常会因为密码错误而抛出 OperationError
+    return null;
   }
 }

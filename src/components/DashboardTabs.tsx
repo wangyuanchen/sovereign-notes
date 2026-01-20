@@ -4,6 +4,7 @@ import { useState } from 'react';
 import NoteList from './NoteList';
 import TodoList from './TodoList';
 import { LayoutList, CheckSquare, Plus } from 'lucide-react';
+import { useTranslation } from '@/lib/i18n';
 
 interface DashboardTabsProps {
   notes: any[];
@@ -11,6 +12,7 @@ interface DashboardTabsProps {
 }
 
 export default function DashboardTabs({ notes, todos }: DashboardTabsProps) {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<'notes' | 'todos'>('notes');
 
   return (
@@ -26,7 +28,7 @@ export default function DashboardTabs({ notes, todos }: DashboardTabsProps) {
           }`}
         >
           <LayoutList className="w-4 h-4" />
-          我的笔记
+          {t('dashboard.tabs.myNotes')}
           <span className="bg-zinc-700/50 text-xs px-1.5 py-0.5 rounded-md ml-1">{notes.length}</span>
         </button>
         <button
@@ -38,7 +40,7 @@ export default function DashboardTabs({ notes, todos }: DashboardTabsProps) {
           }`}
         >
           <CheckSquare className="w-4 h-4" />
-          待办清单
+          {t('dashboard.tabs.todoList')}
           <span className="bg-zinc-700/50 text-xs px-1.5 py-0.5 rounded-md ml-1">{todos.length}</span>
         </button>
       </div>
@@ -48,7 +50,7 @@ export default function DashboardTabs({ notes, todos }: DashboardTabsProps) {
         {activeTab === 'notes' && (
           <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-bold">所有笔记</h3>
+              <h3 className="text-xl font-bold">{t('dashboard.tabs.myNotes')}</h3>
             </div>
             {/* NoteList 已经包含了列表渲染 */}
             <NoteList notes={notes} />
