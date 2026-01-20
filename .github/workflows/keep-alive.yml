@@ -1,9 +1,9 @@
-name: Keep Supabase Alive
+name: Keep Database Alive
 
 on:
   schedule:
-    # 每天 UTC 时间 00:00 运行一次 (北京时间早上 8:00)
-    - cron: "0 0 * * *"
+    # 每 6 小时运行一次，防止数据库因长时间无活动而暂停
+    - cron: "0 */6 * * *"
   workflow_dispatch: # 允许手动触发
 
 jobs:
@@ -12,11 +12,43 @@ jobs:
     steps:
       - name: Ping Keep-Alive Endpoint
         run: |
-          # 请在 GitHub 仓库的 Settings > Secrets and variables > Actions 中配置 APP_URL
-          # 例如: https://your-project.vercel.app
-          if [ -n "${{ secrets.APP_URL }}" ]; then
-            curl -f "${{ secrets.APP_URL }}/api/keep-alive"
-            echo "Successfully pinged database."
+          # ========================================================
+          # 配置方法 A (推荐): 
+          #   在 GitHub 仓库 Settings > Secrets and variables > Actions 
+          #   添加名为 APP_URL 的 Secret
+          #
+          # 配置方法 B (简单): 
+          #   直接修改下面的 DEFAULT_URL 变量，填入你的网址
+          # ========================================================
+          
+          SECRET_URL="${{ secrets.APP_URL }}"
+          
+          # ⬇️ 如果还没配置 Secret，直接把你的网址填在下面引号里
+          DEFAULT_URL="https://sovereign-notes.vercel.app" 
+          
+          # 逻辑：优先使用 Secret，如果没有就使用下面填写的 DEFAULT_URL
+          if [ -n "$SECRET_URL" ]; then
+            TARGET_URL="$SECRET_URL"
           else
-            echo "APP_URL secret is not set. Skipping ping."
+            TARGET_URL="$DEFAULT_URL"
+          fi
+          
+          if [ -z "$TARGET_URL" ]; then
+            echo "错误: 未找到 APP_URL。"
+            echo "解决方案 1: 去 GitHub Settings 配置 APP_URL Secret"
+            echo "解决方案 2: 直接编辑这个文件，在 DEFAULT_URL 处填入网址"
+            exit 1
+          fi
+
+          FULL_URL="${TARGET_URL}/api/keep-alive"
+          echo "Pinging $FULL_URL..."
+          
+          # 使用 -I 只获取头部，-f 遇到错误返回非0状态码
+          RESPONSE=$(curl -I -f -s "$FULL_URL" || echo "failed")
+          
+          if [[ "$RESPONSE" == "failed" ]]; then
+             echo "Ping failed! Please check if the URL is correct and accessible."
+             exit 1
+          else
+             echo "Successfully pinged database."
           fi
