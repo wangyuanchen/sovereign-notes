@@ -9,12 +9,22 @@ const isProtectedRoute = createRouteMatcher([
   '/notes(.*)',
   '/todos(.*)',
   '/dashboard(.*)',
-  '/api(.*)',
+]);
+
+const isPublicRoute = createRouteMatcher([
+  '/sign-in(.*)',
+  '/sign-up(.*)',
+  '/api/webhook(.*)',
+  '/api/keep-alive'
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
+  if (isPublicRoute(req)) {
+    return;
+  }
+
   // 仅在配置了有效 Clerk 密钥时启用认证
-  if (hasValidClerkKey && isProtectedRoute(req)) {
+  if (hasValidClerkKey && (isProtectedRoute(req) || req.nextUrl.pathname.startsWith('/api'))) {
     await auth.protect();
   }
 });
