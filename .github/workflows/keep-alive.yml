@@ -24,7 +24,7 @@ jobs:
           SECRET_URL="${{ secrets.APP_URL }}"
           
           # ⬇️ 如果还没配置 Secret，直接把你的网址填在下面引号里
-          DEFAULT_URL="https://sovereign-notes.vercel.app" 
+          DEFAULT_URL="https://note.svgn.org" 
           
           # 逻辑：优先使用 Secret，如果没有就使用下面填写的 DEFAULT_URL
           if [ -n "$SECRET_URL" ]; then

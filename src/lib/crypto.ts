@@ -85,10 +85,12 @@ export async function decryptData(encryptedContent: string, ivStr: string, saltS
 
     // Helper to validate and decode base64
     const safeDecode = (str: string, name: string) => {
+      if (!str) return '';
       try {
+        // 简单的 Base64 格式检查 (可选)
         return atob(str);
       } catch (e) {
-        throw new Error(`Invalid Base64 string for ${name}. Length: ${str?.length}`);
+        throw new Error(`Invalid Base64 string for ${name}. Value: ${str?.substring(0, 10)}... Length: ${str?.length}`);
       }
     };
 
