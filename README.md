@@ -1,199 +1,229 @@
 # 📝 Sovereign Notes
 
-## Web3 隐私优先的个人笔记与待办清单工具
+> **🌐 Live: [https://note.svgn.org](https://note.svgn.org)**
 
-**MVP 技术与产品文档 v1.0**\
-*最后更新：2026 年 1 月 15 日*
+A privacy-first personal notes and todo app with Web3 wallet support.
 
-***
+**Your notes, always yours — end-to-end encrypted, cross-device sync, wallet login supported, no ads, no tracking.**
 
-## 一、产品定位
+---
 
-> **“你的笔记，永远属于你——端到端加密、跨设备同步、支持钱包登录，无广告、无追踪。”**
+## Sovereign Notes Pro (Production)
 
-*   **目标用户**：注重隐私的个人用户、Web3 爱好者、远程工作者
-*   **核心价值**：
-    *   ✅ 真正端到端加密（E2EE），服务端无法读取内容
-    *   ✅ 支持传统登录（邮箱/Passkey） + Web3 钱包登录
-    *   ✅ 免费基础版 + 透明高级订阅（\$5/月）
-    *   ✅ 支持法币（Stripe）与加密货币（USDC/ETH）双轨支付
-*   **非目标**：团队协作、富媒体编辑、AI 生成（MVP 阶段）
+- **Product Name:** Sovereign Notes Pro
+- **Price:** $5/month (recurring subscription)
+- **Description:** Unlock encrypted cross-device sync, 2GB storage (Arweave + Lit Protocol), daily encrypted backup, wallet login, and more. All encryption happens in your browser. Keys never leave your device.
+- **Payment Methods:** Stripe (credit card), Coinbase (USDC, ETH)
+- **Target Users:** Privacy-conscious individuals, Web3 enthusiasts, remote workers
 
-***
+> Stripe product/price IDs must be created in the Stripe Dashboard and set in your production environment variables (e.g., `STRIPE_PRO_PRICE_ID`).
 
-## 二、核心功能（MVP）
+[English](#english) | [中文](#中文)
 
-| 功能                 | 免费版            | 高级版（\$5/月）                        |
-| ------------------ | -------------- | --------------------------------- |
-| 本地加密笔记 & 待办        | ✅              | ✅                                 |
-| Markdown 编辑 + 代码高亮 | ✅              | ✅                                 |
-| 跨设备同步              | ❌              | ✅（加密后存去中心化网络）                     |
-| 存储空间               | 仅本地（IndexedDB） | 2 GB（Arweave + Lit Protocol）      |
-| 自动备份快照             | ❌              | ✅（每日加密快照）                         |
-| 登录方式               | 邮箱 / Passkey   | + 钱包登录（MetaMask 等）                |
-| 支付方式               | —              | Stripe（信用卡） / Coinbase（USDC, ETH） |
+---
+
+## English
+
+### Product Vision
+
+- **Target Users**: Privacy-conscious individuals, Web3 enthusiasts, remote workers
+- **Core Values**:
+  - ✅ True end-to-end encryption (E2EE) — server cannot read your content
+  - ✅ Traditional login (Email/Passkey) + Web3 wallet login
+  - ✅ Free basic tier + transparent premium subscription ($5/month)
+  - ✅ Dual payment: Stripe (credit card) & Crypto (USDC/ETH)
+- **Non-Goals**: Team collaboration, rich media editing, AI generation (MVP phase)
+
+### Features
+
+| Feature | Free | Pro ($5/month) |
+|---------|------|----------------|
+| Local encrypted notes & todos | ✅ | ✅ |
+| Markdown editing + code highlighting | ✅ | ✅ |
+| Cross-device sync | ❌ | ✅ (encrypted on decentralized network) |
+| Storage | Local only (IndexedDB) | 2 GB (Arweave + Lit Protocol) |
+| Auto backup snapshots | ❌ | ✅ (daily encrypted snapshots) |
+| Login methods | Email / Passkey | + Wallet login (MetaMask, etc.) |
+| Payment methods | — | Stripe / Coinbase (USDC, ETH) |
+
+> 💡 All encryption happens in your browser. Keys never leave your device.
+
+### Tech Stack
+
+| Category | Technology |
+|----------|------------|
+| Framework | Next.js 16 (App Router) |
+| Language | TypeScript |
+| Auth | Clerk + Web3Auth |
+| Database | PostgreSQL + Drizzle ORM |
+| UI | Tailwind CSS + Lucide Icons |
+| Editor | Tiptap + Markdown |
+| Web3 | ethers.js |
+| Payments | Stripe + Coinbase Commerce |
+
+### Security Model
+
+```
+User Browser                    Server                 Storage
+    │                              │                      │
+    ├─ Input plaintext             │                      │
+    ├─ Derive AES key (PBKDF2)     │                      │
+    ├─ Encrypt (AES-GCM)           │                      │
+    ├─ Upload ciphertext ─────────►│─────────────────────►│
+    │                              │                      │
+    │    Server NEVER sees plaintext or keys              │
+```
+
+**Security Guarantees:**
+- All encryption uses **Web Crypto API** (browser-native, tamper-proof)
+- Keys are **never uploaded or stored** on any server
+- Export your complete encrypted data package
+- No IP logging, no behavior tracking, no third-party analytics
+
+### Web3 Integration
+
+| Feature | Implementation |
+|---------|---------------|
+| Wallet Login | Web3Auth → Signature verification → Clerk user mapping |
+| ENS Display | Shows `alice.eth` instead of `0x...` |
+| Decentralized Storage | Encrypted data on Arweave, access controlled by Lit Protocol |
+
+> ⚠️ Web3 is an **optional enhancement**. Regular users can ignore it completely.
+
+### Quick Start
+
+```bash
+# Clone the repository
+git clone https://github.com/wangyuanchen/sovereign-notes.git
+cd sovereign-notes
+
+# Install dependencies
+npm install
+
+# Set up environment variables
+cp .env.example .env.local
+# Edit .env.local with your keys
+
+# Push database schema
+npm run db:push
+
+# Start development server
+npm run dev
+```
+
+### License
+
+This project is licensed under **AGPL-3.0** — if you use this code to run a commercial service, you must open-source your modifications.
+
+---
+
+## 中文
+
+### 产品定位
+
+> **"你的笔记，永远属于你——端到端加密、跨设备同步、支持钱包登录，无广告、无追踪。"**
+
+- **目标用户**：注重隐私的个人用户、Web3 爱好者、远程工作者
+- **核心价值**：
+  - ✅ 真正端到端加密（E2EE），服务端无法读取内容
+  - ✅ 支持传统登录（邮箱/Passkey） + Web3 钱包登录
+  - ✅ 免费基础版 + 透明高级订阅（$5/月）
+  - ✅ 支持法币（Stripe）与加密货币（USDC/ETH）双轨支付
+- **非目标**：团队协作、富媒体编辑、AI 生成（MVP 阶段）
+
+### 核心功能
+
+| 功能 | 免费版 | 高级版（$5/月） |
+|------|--------|----------------|
+| 本地加密笔记 & 待办 | ✅ | ✅ |
+| Markdown 编辑 + 代码高亮 | ✅ | ✅ |
+| 跨设备同步 | ❌ | ✅（加密后存去中心化网络） |
+| 存储空间 | 仅本地（IndexedDB） | 2 GB（Arweave + Lit Protocol） |
+| 自动备份快照 | ❌ | ✅（每日加密快照） |
+| 登录方式 | 邮箱 / Passkey | + 钱包登录（MetaMask 等） |
+| 支付方式 | — | Stripe（信用卡） / Coinbase（USDC, ETH） |
 
 > 💡 所有加密操作在浏览器完成，密钥永不离开设备。
 
-***
+### 技术栈
 
-## 三、技术栈
+| 类别 | 技术 |
+|------|------|
+| 框架 | Next.js 16 (App Router) |
+| 语言 | TypeScript |
+| 认证 | Clerk + Web3Auth |
+| 数据库 | PostgreSQL + Drizzle ORM |
+| UI | Tailwind CSS + Lucide Icons |
+| 编辑器 | Tiptap + Markdown |
+| Web3 | ethers.js |
+| 支付 | Stripe + Coinbase Commerce |
 
-### 🧱 全栈框架
+### 安全模型
 
-| 类别  | 技术                               | 版本        | 说明                                   |
-| --- | -------------------------------- | --------- | ------------------------------------ |
-| 运行时 | Node.js                          | `20+`     | -                                    |
-| 框架  | Next.js                          | `14.2.15` | App Router + React Server Components |
-| 语言  | TypeScript                       | `5.5+`    | 全栈类型安全                               |
-| 构建  | Turbopack (dev) / Webpack (prod) | -         | 内置                                   |
-| 包管理 | pnpm                             | `9.x`     | 快速、节省磁盘                              |
-
-### 🎨 前端 UI
-
-| 组件                                | 用途                    |
-| --------------------------------- | --------------------- |
-| `shadcn/ui` + Radix UI            | 可定制、无障碍、暗色模式友好        |
-| Tailwind CSS `3.4.3`              | 原子化样式                 |
-| Lucide React `0.450.0`            | 图标                    |
-| `react-markdown` + `rehype-shiki` | 安全 Markdown 渲染 + 代码高亮 |
-
-### 🔐 认证与权限
-
-| 技术                    | 作用                                     |
-| --------------------- | -------------------------------------- |
-| `@clerk/nextjs 5.0.0` | 用户认证（邮箱/Google/Passkey）                |
-| 自定义 Web3 桥接层          | 集成 Web3Auth，将钱包地址映射为 Clerk External ID |
-| Middleware            | 拦截未授权访问 `/app/*` 路由                    |
-
-### 🗄️ 数据库与存储
-
-| 层级             | 技术                     | 说明                 |
-| -------------- | ---------------------- | ------------------ |
-| **结构化数据**      | PlanetScale (MySQL)    | 存用户元数据、笔记密文、订阅状态   |
-| **ORM**        | Drizzle ORM `0.30.0`   | 轻量、类型安全、支持 migrate |
-| **去中心化存储（高级）** | Arweave + Lit Protocol | 加密笔记持久化，权限由用户钱包控制  |
-| **本地存储**       | IndexedDB              | 免费用户数据缓存           |
-
-### 💳 支付系统
-
-| 方式   | 服务商                         | 说明                              |
-| ---- | --------------------------- | ------------------------------- |
-| 法币订阅 | Stripe                      | 主支付通道，支持 Apple Pay / Google Pay |
-| 加密货币 | Coinbase Commerce           | 支持 USDC、ETH，固定 USD 定价，1% 手续费    |
-| 订阅状态 | PlanetScale `users.plan` 字段 | `free` / `pro`，由任一支付成功触发更新      |
-
-***
-
-## 四、隐私与安全模型
-
-### 🔒 数据流（关键！）
-
-```mermaid
-sequenceDiagram
-    participant User as 用户浏览器
-    participant Server as Next.js API
-    participant DB as PlanetScale
-    participant Arweave as Arweave (高级)
-
-    User->>User: 输入笔记明文
-    User->>User: 用用户密码派生 AES 密钥（PBKDF2）
-    User->>User: AES-GCM 加密 → 密文 + IV
-    alt 免费用户
-        User->>DB: 上传密文（仅用于跨设备同步）
-    else 高级用户
-        User->>Arweave: 上传密文（通过 Lit Protocol 加密分发）
-        User->>DB: 仅存元数据（标题密文、更新时间）
-    end
-    Note right of DB: 服务端永远无法解密内容
+```
+用户浏览器                       服务端                  存储
+    │                              │                      │
+    ├─ 输入明文                     │                      │
+    ├─ 派生 AES 密钥 (PBKDF2)       │                      │
+    ├─ 加密 (AES-GCM)              │                      │
+    ├─ 上传密文 ──────────────────►│─────────────────────►│
+    │                              │                      │
+    │       服务端永远无法看到明文或密钥                      │
 ```
 
-### ✅ 安全承诺
+**安全承诺：**
+- 所有加密使用 **Web Crypto API**（浏览器原生，不可篡改）
+- 密钥**不上传、不存储**于任何服务器
+- 支持用户**导出完整加密数据包**
+- 无 IP 日志、无行为追踪、无第三方分析
 
-*   所有加密使用 **Web Crypto API**（浏览器原生，不可篡改）
-*   密钥**不上传、不存储**于任何服务器
-*   支持用户**导出完整加密数据包**（`.sovereign.enc`）
-*   无 IP 日志、无行为追踪、无第三方分析（除必要支付外）
+### Web3 融合
 
-***
-
-## 五、Web3 融合设计
-
-| 功能           | 实现方式                                                        |
-| ------------ | ----------------------------------------------------------- |
-| **钱包登录**     | Web3Auth 前端 SDK → 签名验证 → 创建/关联 Clerk 用户（External ID = 钱包地址） |
-| **ENS 显示**   | 前端调用 ENS 合约，将 `0x...` 显示为 `alice.eth`                       |
-| **链上凭证（未来）** | 持有特定 NFT 自动解锁 Pro（通过 Alchemy 监听）                            |
-| **去中心化存储**   | 高级用户数据加密后存 Arweave，访问权限由 Lit Protocol 控制                    |
+| 功能 | 实现方式 |
+|------|----------|
+| 钱包登录 | Web3Auth → 签名验证 → Clerk 用户映射 |
+| ENS 显示 | 将 `0x...` 显示为 `alice.eth` |
+| 去中心化存储 | 加密数据存 Arweave，访问权限由 Lit Protocol 控制 |
 
 > ⚠️ Web3 是**增强选项**，非强制。普通用户可完全忽略。
 
-***
+### 快速开始
 
-## 六、支付集成策略
+```bash
+# 克隆仓库
+git clone https://github.com/wangyuanchen/sovereign-notes.git
+cd sovereign-notes
 
-### 双轨支付流程
+# 安装依赖
+npm install
 
-```mermaid
-graph LR
-    A[订阅页面] --> B{选择支付方式}
-    B -->|信用卡| C[Stripe Checkout]
-    B -->|加密货币| D[Coinbase Commerce]
-    C --> E[Stripe Webhook]
-    D --> F[Coinbase Webhook]
-    E --> G[更新 users.plan = 'pro']
-    F --> G
-    G --> H[用户获得 Pro 权限]
+# 设置环境变量
+cp .env.example .env.local
+# 编辑 .env.local 填入你的密钥
+
+# 推送数据库 schema
+npm run db:push
+
+# 启动开发服务器
+npm run dev
 ```
 
-### 为什么保留 Stripe？
+### 开源协议
 
-*   覆盖 70%+ 非 Web3 用户
-*   转化率高（Apple Pay 一键支付）
-*   提供信任背书
-*   你已集成，边际成本≈0
+本项目使用 **AGPL-3.0** 协议 — 如果你使用本代码运行商业服务，必须开源你的修改。
 
-***
+---
 
-## 七、开发路线图（个人开发者友好）
+## Contributing
 
-| 时间         | 里程碑                  | 关键产出                     |
-| ---------- | -------------------- | ------------------------ |
-| **Week 1** | 核心编辑器 + 本地加密         | 可离线使用的笔记/待办，纯前端          |
-| **Week 2** | Clerk 集成 + CRUD      | 用户登录、笔记增删改查（密文存 DB）      |
-| **Week 3** | Stripe 订阅 + 权限       | 免费/Pro 切换，Stripe webhook |
-| **Week 4** | Coinbase Commerce 接入 | Crypto 支付按钮 + webhook 升级 |
-| **Week 5** | Web3Auth 钱包登录        | 支持 MetaMask 登录并关联账户      |
-| **Week 6** | MVP 上线 + PH 发布       | producthunt.com 发布，收集反馈  |
+Contributions are welcome! Please read our contributing guidelines before submitting a PR.
 
-***
+## Support
 
-## 八、合规与运营
+- 🐛 Issues: [GitHub Issues](https://github.com/wangyuanchen/sovereign-notes/issues)
 
-*   **隐私政策**：明确说明“我们无法访问你的笔记”
-*   **支付合规**：Stripe + Coinbase 均负责 KYC/AML，你只需记录交易 ID
-*   **退出机制**：提供“导出全部数据”功能（含解密说明）
-*   **定价透明**：官网公示“`$5/月 = 存储成本 $`0.8 + 开发维护”
+---
 
-***
+**Sovereign Notes is not just another note-taking tool — it's a gateway to data sovereignty.**
 
-## 九、未来扩展方向
-
-*   PWA 安装 → 桌面/手机 App（Electron / Capacitor）
-*   插件系统（如 Notion-like blocks）
-*   DAO 团队版（B2B 高 ARPU）
-*   Token-gated 模板市场（创作者分润）
-
-***
-
-> **Sovereign Notes 不是另一个笔记工具，而是一个“数据主权”的入口。**\
-> 我们不做 AI、不做社交、不做广告——只做一件事：**让你的数据，真正属于你。**
-
-***
-
-📄 **附录**
-
-*   [ ] GitHub 仓库初始化模板（Next.js 14 + Clerk + Drizzle）
-*   [ ] 加密工具类（`cryptoUtils.ts`）
-*   [ ] Coinbase Webhook 验证中间件
-*   [ ] PlanetScale 表结构（Drizzle schema）
+We don't do AI, we don't do social, we don't do ads — we do one thing: **Make your data truly yours.**

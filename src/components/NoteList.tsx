@@ -6,6 +6,8 @@ import { decryptData } from '@/lib/crypto';
 import { Lock, Unlock, X, Trash2, Loader2, Wallet } from 'lucide-react';
 import { useWeb3Vault } from '@/hooks/useWeb3Vault';
 import { useTranslation } from '@/lib/i18n';
+import { toast } from 'sonner';
+import { useConfirm } from '@/components/ui/Confirm';
 import MarkdownRenderer from './MarkdownRenderer';
 
 interface Note {
@@ -26,6 +28,7 @@ interface NoteListProps {
 
 export default function NoteList({ notes, onNoteDeleted, onNoteSelect }: NoteListProps) {
   const { t } = useTranslation();
+  const { confirm } = useConfirm();
   const [selectedNote, setSelectedNote] = useState<Note | null>(null);
   const [decryptedContent, setDecryptedContent] = useState<string | null>(null);
   const { vaultKey, connectWallet, deriveKeyFromSignature, isReady } = useWeb3Vault();
@@ -89,7 +92,14 @@ export default function NoteList({ notes, onNoteDeleted, onNoteSelect }: NoteLis
 
   const handleDelete = async (noteId: number, e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!confirm(t('common.deleteConfirm'))) {
+    const shouldDelete = await confirm({
+      title: t('common.deleteNote'),
+      message: t('common.deleteConfirm'),
+      confirmText: t('common.delete'),
+      cancelText: t('common.cancel'),
+      type: 'danger',
+    });
+    if (!shouldDelete) {
       return;
     }
     setDeletingId(noteId);
@@ -98,9 +108,10 @@ export default function NoteList({ notes, onNoteDeleted, onNoteSelect }: NoteLis
     const result = await deleteNoteAction(noteId);
 
     if (result.success) {
+      toast.success(t('common.deleteSuccess'));
       onNoteDeleted?.();
     } else {
-      alert(result.error || t('common.deleteFailed'));
+      toast.error(result.error || t('common.deleteFailed'));
     }
     setDeletingId(null);
   };
@@ -175,9 +186,9 @@ export default function NoteList({ notes, onNoteDeleted, onNoteSelect }: NoteLis
       {/* Note Detail Modal */}
       {selectedNote && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-           <div className="bg-zinc-900 border border-zinc-800 w-full max-w-2xl max-h-[85vh] rounded-2xl flex flex-col shadow-2xl relative overflow-hidden animate-in zoom-in-95 duration-200">
+           <div className="bg-zinc-900 border border-zinc-800 w-full max-w-2xl max-h-[90vh] rounded-2xl flex flex-col shadow-2xl relative overflow-hidden animate-in zoom-in-95 duration-200">
               {/* Header */}
-              <div className="p-4 border-b border-zinc-800 flex justify-between items-center bg-zinc-900/50">
+              <div className="p-4 border-b border-zinc-800 flex justify-between items-center bg-zinc-900/50 shrink-0">
                  <h2 className="text-lg font-bold truncate pr-8">{selectedNote.title || t('common.noteDetails')}</h2>
                  <button
                    onClick={() => setSelectedNote(null)}
@@ -188,7 +199,7 @@ export default function NoteList({ notes, onNoteDeleted, onNoteSelect }: NoteLis
               </div>
 
               {/* Content */}
-              <div className="flex-1 overflow-y-auto p-6 min-h-[300px] custom-scrollbar">
+              <div className="flex-1 overflow-y-auto p-6 min-h-[400px] custom-scrollbar">
                  {decryptedContent ? (
                    <div className="animate-in fade-in slide-in-from-bottom-2">
                      <div className="flex items-center gap-2 text-emerald-400 mb-4 text-xs uppercase tracking-widest">

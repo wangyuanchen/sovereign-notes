@@ -32,4 +32,6 @@ export const users = pgTable("users", {
   subscriptionStatus: varchar("subscription_status", { length: 50 }).default("inactive"), // 'active', 'inactive', 'expired'
   subscriptionEndsAt: timestamp("subscription_ends_at"),
   walletAddress: varchar("wallet_address", { length: 255 }), // Web3 支付钱包地址
+  stripeCustomerId: varchar("stripe_customer_id", { length: 255 }), // Stripe 客户 ID
+  stripeSubscriptionId: varchar("stripe_subscription_id", { length: 255 }), // Stripe 订阅 ID
 });

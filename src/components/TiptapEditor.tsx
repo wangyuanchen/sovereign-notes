@@ -31,7 +31,7 @@ export default function TiptapEditor({ content, onChange, className, placeholder
     content: content,
     editorProps: {
       attributes: {
-        class: `prose prose-invert prose-sm max-w-none focus:outline-none min-h-[300px] ${className || ''}`,
+        class: `prose prose-invert prose-sm max-w-none focus:outline-none min-h-[400px] h-full ${className || ''}`,
       },
     },
     onUpdate: ({ editor }) => {
@@ -59,5 +59,5 @@ export default function TiptapEditor({ content, onChange, className, placeholder
     return <div className="min-h-[300px] animate-pulse bg-zinc-900/50 rounded-lg"></div>;
   }
 
-  return <EditorContent editor={editor} className="h-full" />;
+  return <EditorContent editor={editor} className="h-full min-h-[400px]" />;
 }

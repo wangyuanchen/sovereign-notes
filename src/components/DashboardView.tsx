@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useTranslation } from '@/lib/i18n';
 import DashboardTabs from "@/components/DashboardTabs";
 import CreateNoteForm from '@/components/CreateNoteForm';
+import SubscriptionButton from '@/components/SubscriptionButton';
 import { LayoutList, CheckSquare } from 'lucide-react';
 
 interface DashboardViewProps {
@@ -11,10 +12,14 @@ interface DashboardViewProps {
   todos: any[];
   completedTodos: any[];
   pendingTodos: any[];
+  userPlan?: 'free' | 'pro' | 'early_bird';
+  subscriptionStatus?: 'active' | 'inactive' | 'expired';
 }
 
-export default function DashboardView({ notes, todos, completedTodos, pendingTodos }: DashboardViewProps) {
+export default function DashboardView({ notes, todos, completedTodos, pendingTodos, userPlan = 'free', subscriptionStatus = 'inactive' }: DashboardViewProps) {
   const { t } = useTranslation();
+
+  const planLabel = userPlan === 'pro' ? 'Pro Plan' : userPlan === 'early_bird' ? 'Early Bird' : t('dashboard.freePlan');
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-50 p-4 md:p-8">
@@ -27,7 +32,7 @@ export default function DashboardView({ notes, todos, completedTodos, pendingTod
           </Link>
         </div>
         <div className="flex items-center gap-4">
-          <span className="text-sm text-zinc-500">{t('dashboard.freePlan')}</span>
+          <span className={`text-sm ${userPlan !== 'free' ? 'text-sky-400' : 'text-zinc-500'}`}>{planLabel}</span>
         </div>
       </header>
 
@@ -70,17 +75,8 @@ export default function DashboardView({ notes, todos, completedTodos, pendingTod
 
            {/* Right Section: Quick Access or small stats */}
            <div className="hidden lg:flex lg:col-span-4 flex-col gap-6 sticky top-8">
-              <div className="bg-gradient-to-br from-indigo-900/40 to-purple-900/40 border border-indigo-500/20 rounded-3xl p-6 relative overflow-hidden group">
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/20 rounded-full blur-3xl group-hover:bg-indigo-500/30 transition duration-700"></div>
-
-                  <h3 className="text-lg font-bold mb-2">Pro Features</h3>
-                  <p className="text-sm text-indigo-200 mb-4 leading-relaxed">
-                    Access advanced AI models, unlimited cloud storage, and team collaboration.
-                  </p>
-                  <button className="bg-indigo-500 hover:bg-indigo-400 text-white px-4 py-2 rounded-xl text-sm font-semibold w-full transition shadow-lg shadow-indigo-500/20">
-                    Upgrade to Pro
-                  </button>
-              </div>
+              {/* Subscription Button */}
+              <SubscriptionButton currentPlan={userPlan} subscriptionStatus={subscriptionStatus} />
 
                {/* Calendar Placeholder */}
                <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-6 h-[300px] flex items-center justify-center text-zinc-600">

@@ -9,6 +9,8 @@ import { useWeb3Vault } from '@/hooks/useWeb3Vault';
 import { useTranslation } from '@/lib/i18n';
 import { Loader2, Wand2, Eye, PenLine, Lock, Save, Columns, FileText, FileCode, Wallet } from 'lucide-react';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
+import { toast } from 'sonner';
+import { useConfirm } from '@/components/ui/Confirm';
 import dynamic from 'next/dynamic';
 
 const TiptapEditor = dynamic(() => import('@/components/TiptapEditor'), { ssr: false });
@@ -18,6 +20,7 @@ type ViewMode = 'wysiwyg' | 'split';
 
 export default function CreateNoteForm() {
   const { t } = useTranslation();
+  const { confirm } = useConfirm();
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   // const [password, setPassword] = useState(''); // Removed manual password
@@ -36,24 +39,37 @@ export default function CreateNoteForm() {
     if (!aiPrompt.trim()) return;
     setIsGenerating(true);
     try {
-      const result = await generateNoteFromPrompt(aiPrompt);
+      // 根据当前文档类型生成对应格式的内容
+      const result = await generateNoteFromPrompt(aiPrompt, docType);
       if (result.success && result.data) {
         setTitle(result.data.title);
         setContent(result.data.content);
+        
+        toast.success(t('editor.generationSuccess'));
 
         // Auto-add todos
         if (result.data.todos && result.data.todos.length > 0) {
-          if (confirm(t('editor.aiFoundTasks', { count: result.data.todos.length.toString() }))) {
+          const shouldAdd = await confirm({
+            title: t('editor.addTasks'),
+            message: t('editor.aiFoundTasks', { count: result.data.todos.length.toString() }),
+            confirmText: t('common.confirm'),
+            cancelText: t('common.cancel'),
+            type: 'info',
+          });
+          if (shouldAdd) {
             for (const todo of result.data.todos) {
               await addTodo(todo.task, undefined, todo.dueDate ? new Date(todo.dueDate) : undefined, todo.frequency);
             }
+            toast.success(t('editor.tasksAdded'));
           }
         }
         setShowAiInput(false);
+      } else {
+        toast.error(t('editor.generationFailed'));
       }
     } catch (e) {
       console.error(e);
-      alert(t('editor.generationFailed'));
+      toast.error(t('editor.generationFailed'));
     } finally {
       setIsGenerating(false);
     }
@@ -64,7 +80,14 @@ export default function CreateNoteForm() {
 
     // Web3: Check if we have the derived key
     if (!vaultKey) {
-      if (confirm(t('editor.connectPrompt'))) {
+      const shouldConnect = await confirm({
+        title: t('editor.connectWallet'),
+        message: t('editor.connectPrompt'),
+        confirmText: t('editor.connect'),
+        cancelText: t('common.cancel'),
+        type: 'info',
+      });
+      if (shouldConnect) {
         const address = await connectWallet();
         if (address) {
           await deriveKeyFromSignature();
@@ -88,25 +111,32 @@ export default function CreateNoteForm() {
       if (result.success) {
         setTitle('');
         setContent('');
-        alert(t('editor.noteSaved'));
+        toast.success(t('editor.noteSaved'));
       }
     } catch (e) {
       console.error(e);
-      alert(t('editor.saveFailed'));
+      toast.error(t('editor.saveFailed'));
     } finally {
       setIsSaving(false);
     }
   };
 
+  // 有内容后禁止切换文档类型
+  const hasContent = content.trim().length > 0;
+
   const renderEditorTools = () => {
     return (
       <div className="flex bg-zinc-950/50 p-1 rounded-lg border border-zinc-800/50">
         <button
-          onClick={() => setDocType('plain')}
+          onClick={() => !hasContent && setDocType('plain')}
+          disabled={hasContent}
+          title={hasContent ? t('editor.cannotSwitchType') : undefined}
           className={`px-4 py-1.5 rounded-md text-xs font-medium transition flex items-center gap-2 ${
             docType === 'plain' 
               ? 'bg-zinc-800 text-white shadow-sm' 
-              : 'text-zinc-500 hover:text-zinc-300'
+              : hasContent 
+                ? 'text-zinc-600 cursor-not-allowed'
+                : 'text-zinc-500 hover:text-zinc-300'
           }`}
         >
           <FileText className="w-3.5 h-3.5" />
@@ -114,14 +144,19 @@ export default function CreateNoteForm() {
         </button>
         <button
           onClick={() => {
+            if (hasContent) return;
             setDocType('markdown');
             // 切换到 Markdown 时，默认为所见即所得 (wysiwyg)
             if (viewMode !== 'split') setViewMode('wysiwyg');
           }}
+          disabled={hasContent}
+          title={hasContent ? t('editor.cannotSwitchType') : undefined}
           className={`px-4 py-1.5 rounded-md text-xs font-medium transition flex items-center gap-2 ${
             docType === 'markdown' 
               ? 'bg-zinc-800 text-white shadow-sm' 
-              : 'text-zinc-500 hover:text-zinc-300'
+              : hasContent
+                ? 'text-zinc-600 cursor-not-allowed'
+                : 'text-zinc-500 hover:text-zinc-300'
           }`}
         >
           <FileCode className="w-3.5 h-3.5" />
@@ -161,7 +196,7 @@ export default function CreateNoteForm() {
   };
 
   return (
-    <div className={`bg-zinc-900/50 border border-zinc-800 rounded-2xl flex flex-col gap-4 transition-all duration-300 ${viewMode === 'split' ? 'md:col-span-12' : 'p-4'}`}>
+    <div className={`bg-zinc-900/50 border border-zinc-800 rounded-2xl flex flex-col gap-4 transition-all duration-300 min-h-[600px] ${viewMode === 'split' ? 'md:col-span-12 p-4' : 'p-4'}`}>
 
       {/* Top Bar */}
       <div className="flex justify-between items-center px-4 pt-4">
@@ -210,18 +245,18 @@ export default function CreateNoteForm() {
         />
       </div>
 
-      <div className={`relative px-4 ${docType === 'markdown' ? 'h-[500px]' : 'min-h-[300px]'}`}>
+      <div className={`relative px-4 flex-1 min-h-[400px]`}>
 
         {/* Editor Container */}
-        <div className={`w-full h-full`}>
+        <div className={`w-full h-full min-h-[400px]`}>
 
           {/* Plain Text or Markdown Split Mode (Source) */}
           {(docType === 'plain' || (docType === 'markdown' && viewMode === 'split')) && (
-             <div className={`w-full h-full ${viewMode === 'split' ? 'grid grid-cols-2 gap-4' : ''}`}>
+             <div className={`w-full h-full min-h-[400px] ${viewMode === 'split' ? 'grid grid-cols-2 gap-4' : ''}`}>
                 <textarea
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
-                  className={`w-full h-full bg-transparent outline-none resize-none placeholder-zinc-600 custom-scrollbar leading-relaxed p-4 ${
+                  className={`w-full h-full min-h-[400px] bg-transparent outline-none resize-none placeholder-zinc-600 custom-scrollbar leading-relaxed p-4 ${
                     docType === 'markdown' ? 'font-mono text-sm text-zinc-300 bg-zinc-950/30 rounded-lg border border-zinc-800/30' : 'font-sans text-base text-zinc-100'
                   }`}
                   placeholder={docType === 'markdown' ? t('editor.placeholderMarkdown') : t('editor.placeholderPlain')}
