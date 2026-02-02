@@ -136,7 +136,7 @@ export default function SubscriptionButton({
               : 'text-zinc-400 hover:text-white'
           }`}
         >
-          Monthly · $5
+          Monthly · $1
         </button>
         <button
           onClick={() => setSelectedPlan('yearly')}
@@ -146,8 +146,8 @@ export default function SubscriptionButton({
               : 'text-zinc-400 hover:text-white'
           }`}
         >
-          Yearly · $50
-          <span className="ml-1 text-green-500 text-xs">Save 17%</span>
+          Yearly · $9
+          <span className="ml-1 text-green-500 text-xs">Save 25%</span>
         </button>
       </div>
 
