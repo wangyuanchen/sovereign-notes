@@ -18,13 +18,13 @@ if (!process.env.STRIPE_MONTHLY_PRICE_ID || !process.env.STRIPE_YEARLY_PRICE_ID)
 export const SUBSCRIPTION_PRICES = {
   monthly: {
     priceId: process.env.STRIPE_MONTHLY_PRICE_ID || '',
-    amount: 500, // $5.00
+    amount: 100, // $1.00
     currency: 'usd',
     interval: 'month' as const,
   },
   yearly: {
     priceId: process.env.STRIPE_YEARLY_PRICE_ID || '',
-    amount: 5000, // $50.00 (2个月免费)
+    amount: 900, // $9.00 (3个月免费)
     currency: 'usd',
     interval: 'year' as const,
   },

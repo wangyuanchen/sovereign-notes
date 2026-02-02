@@ -11,7 +11,7 @@ A privacy-first personal notes and todo app with Web3 wallet support.
 ## Sovereign Notes Pro (Production)
 
 - **Product Name:** Sovereign Notes Pro
-- **Price:** $5/month (recurring subscription)
+- **Price:** $1/month (recurring subscription)
 - **Description:** Unlock encrypted cross-device sync, 2GB storage (Arweave + Lit Protocol), daily encrypted backup, wallet login, and more. All encryption happens in your browser. Keys never leave your device.
 - **Payment Methods:** Stripe (credit card), Coinbase (USDC, ETH)
 - **Target Users:** Privacy-conscious individuals, Web3 enthusiasts, remote workers
@@ -30,13 +30,13 @@ A privacy-first personal notes and todo app with Web3 wallet support.
 - **Core Values**:
   - ✅ True end-to-end encryption (E2EE) — server cannot read your content
   - ✅ Traditional login (Email/Passkey) + Web3 wallet login
-  - ✅ Free basic tier + transparent premium subscription ($5/month)
+  - ✅ Free basic tier + transparent premium subscription ($1/month)
   - ✅ Dual payment: Stripe (credit card) & Crypto (USDC/ETH)
 - **Non-Goals**: Team collaboration, rich media editing, AI generation (MVP phase)
 
 ### Features
 
-| Feature | Free | Pro ($5/month) |
+| Feature | Free | Pro ($1/month) |
 |---------|------|----------------|
 | Local encrypted notes & todos | ✅ | ✅ |
 | Markdown editing + code highlighting | ✅ | ✅ |
@@ -127,13 +127,13 @@ This project is licensed under **AGPL-3.0** — if you use this code to run a co
 - **核心价值**：
   - ✅ 真正端到端加密（E2EE），服务端无法读取内容
   - ✅ 支持传统登录（邮箱/Passkey） + Web3 钱包登录
-  - ✅ 免费基础版 + 透明高级订阅（$5/月）
+  - ✅ 免费基础版 + 透明高级订阅（$1/月）
   - ✅ 支持法币（Stripe）与加密货币（USDC/ETH）双轨支付
 - **非目标**：团队协作、富媒体编辑、AI 生成（MVP 阶段）
 
 ### 核心功能
 
-| 功能 | 免费版 | 高级版（$5/月） |
+| 功能 | 免费版 | 高级版（$1/月） |
 |------|--------|----------------|
 | 本地加密笔记 & 待办 | ✅ | ✅ |
 | Markdown 编辑 + 代码高亮 | ✅ | ✅ |
