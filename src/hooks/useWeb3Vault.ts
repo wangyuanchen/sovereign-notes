@@ -5,10 +5,34 @@ import { BrowserProvider } from 'ethers';
 import { toast } from 'sonner';
 import { useTranslation } from '@/lib/i18n';
 
+// Helper to detect mobile device
+const isMobileDevice = () => {
+  if (typeof window === 'undefined') return false;
+  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+    navigator.userAgent
+  );
+};
+
+// Helper to check if we're inside MetaMask's in-app browser
+const isMetaMaskBrowser = () => {
+  if (typeof window === 'undefined') return false;
+  return (window as any).ethereum?.isMetaMask && isMobileDevice();
+};
+
+// Generate MetaMask deep link to open current page in MetaMask browser
+const getMetaMaskDeepLink = () => {
+  if (typeof window === 'undefined') return '';
+  const currentUrl = window.location.href;
+  // MetaMask deep link format: https://metamask.app.link/dapp/{url without protocol}
+  const urlWithoutProtocol = currentUrl.replace(/^https?:\/\//, '');
+  return `https://metamask.app.link/dapp/${urlWithoutProtocol}`;
+};
+
 export function useWeb3Vault() {
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
   const [vaultKey, setVaultKey] = useState<string | null>(null);
   const [isReady, setIsReady] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { t } = useTranslation();
 
@@ -22,6 +46,9 @@ export function useWeb3Vault() {
 
   // 初始化检查
   useEffect(() => {
+    // 检测移动设备
+    setIsMobile(isMobileDevice());
+    
     // 检查是否有缓存的 Key (Session级别)
     const cachedKey = sessionStorage.getItem('sovereign_vault_key');
     if (cachedKey) {
@@ -37,14 +64,29 @@ export function useWeb3Vault() {
   const connectWallet = async () => {
     setError(null);
     if (typeof window === 'undefined' || !(window as any).ethereum) {
-      toast.warning(t('web3.noWallet'), {
-        description: t('web3.installMetaMask'),
-        action: {
-          label: t('web3.download'),
-          onClick: () => window.open('https://metamask.io/download/', '_blank')
-        },
-        duration: 8000,
-      });
+      // Check if on mobile - show different message and action
+      if (isMobileDevice()) {
+        toast.warning(t('web3.noWalletMobile'), {
+          description: t('web3.openInMetaMask'),
+          action: {
+            label: t('web3.openMetaMask'),
+            onClick: () => {
+              const deepLink = getMetaMaskDeepLink();
+              window.location.href = deepLink;
+            }
+          },
+          duration: 10000,
+        });
+      } else {
+        toast.warning(t('web3.noWallet'), {
+          description: t('web3.installMetaMask'),
+          action: {
+            label: t('web3.download'),
+            onClick: () => window.open('https://metamask.io/download/', '_blank')
+          },
+          duration: 8000,
+        });
+      }
       return null;
     }
 
@@ -74,13 +116,28 @@ export function useWeb3Vault() {
   const deriveKeyFromSignature = async () => {
     setError(null);
     if (typeof window === 'undefined' || !(window as any).ethereum) {
-      toast.warning(t('web3.noWallet'), {
-        description: t('web3.installMetaMask'),
-        action: {
-          label: t('web3.download'),
-          onClick: () => window.open('https://metamask.io/download/', '_blank')
-        }
-      });
+      // Check if on mobile - show different message and action
+      if (isMobileDevice()) {
+        toast.warning(t('web3.noWalletMobile'), {
+          description: t('web3.openInMetaMask'),
+          action: {
+            label: t('web3.openMetaMask'),
+            onClick: () => {
+              const deepLink = getMetaMaskDeepLink();
+              window.location.href = deepLink;
+            }
+          },
+          duration: 10000,
+        });
+      } else {
+        toast.warning(t('web3.noWallet'), {
+          description: t('web3.installMetaMask'),
+          action: {
+            label: t('web3.download'),
+            onClick: () => window.open('https://metamask.io/download/', '_blank')
+          }
+        });
+      }
       return null;
     }
 
@@ -119,11 +176,16 @@ export function useWeb3Vault() {
 
   return {
     isReady,
+    isMobile,
     walletAddress,
     vaultKey,
     error,
     connectWallet,
     deriveKeyFromSignature,
-    clearKey
+    clearKey,
+    openInMetaMask: () => {
+      const deepLink = getMetaMaskDeepLink();
+      window.location.href = deepLink;
+    }
   };
 }
