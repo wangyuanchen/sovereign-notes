@@ -69,6 +69,8 @@ export const zh = {
     connectFirst: '请先连接钱包',
     connectionFailed: '连接失败',
     connectCancelled: '连接已取消',
+    walletConnected: '钱包已连接',
+    signatureCancelled: '签名已取消',
     vaultUnlocked: 'Web3 密钥库已解锁',
     vaultUnlockedDesc: '您的笔记现在已受到端到端加密保护',
     signatureFailed: '签名验证失败',
