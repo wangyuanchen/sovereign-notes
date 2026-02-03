@@ -3,7 +3,6 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { Toaster } from 'sonner';
 import { I18nProvider } from '@/lib/i18n';
 import { ConfirmProvider } from '@/components/ui/Confirm';
-import { Web3Provider } from '@/components/Web3Provider';
 import DevBanner from '@/components/DevBanner';
 import "./globals.css";
 
@@ -28,15 +27,13 @@ export default function RootLayout({
       <html lang="en" className="dark">
         <body className="antialiased bg-zinc-950 text-zinc-50">
           <I18nProvider>
-            <Web3Provider>
-              <ConfirmProvider>
-                <Toaster richColors theme="dark" position="top-center" />
-                <DevBanner />
-                <div className="pt-10">
-                  {children}
-                </div>
-              </ConfirmProvider>
-            </Web3Provider>
+            <ConfirmProvider>
+              <Toaster richColors theme="dark" position="top-center" />
+              <DevBanner />
+              <div className="pt-10">
+                {children}
+              </div>
+            </ConfirmProvider>
           </I18nProvider>
         </body>
       </html>
@@ -48,12 +45,10 @@ export default function RootLayout({
       <html lang="en" className="dark">
         <body className="antialiased bg-zinc-950 text-zinc-50">
           <I18nProvider>
-            <Web3Provider>
-              <ConfirmProvider>
-                <Toaster richColors theme="dark" position="top-center" />
-                {children}
-              </ConfirmProvider>
-            </Web3Provider>
+            <ConfirmProvider>
+              <Toaster richColors theme="dark" position="top-center" />
+              {children}
+            </ConfirmProvider>
           </I18nProvider>
         </body>
       </html>
