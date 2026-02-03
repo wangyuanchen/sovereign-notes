@@ -65,6 +65,8 @@ export const zh = {
     noWalletMobile: '钱包不可用',
     openInMetaMask: '手机浏览器不支持钱包扩展。请在 MetaMask App 内置浏览器中打开此页面。',
     openMetaMask: '在 MetaMask 中打开',
+    redirectingToMetaMask: '正在跳转到 MetaMask...',
+    connectFirst: '请先连接钱包',
     connectionFailed: '连接失败',
     connectCancelled: '连接已取消',
     vaultUnlocked: 'Web3 密钥库已解锁',
