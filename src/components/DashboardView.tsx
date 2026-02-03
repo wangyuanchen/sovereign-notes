@@ -62,6 +62,11 @@ export default function DashboardView({ notes, todos, completedTodos, pendingTod
            </div>
         </div>
 
+        {/* Mobile: Subscription Button - Show on small screens */}
+        <div className="block lg:hidden mb-8">
+          <SubscriptionButton currentPlan={userPlan} subscriptionStatus={subscriptionStatus} />
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
 
            {/* Left Section: Create Form or Stats */}
@@ -73,7 +78,7 @@ export default function DashboardView({ notes, todos, completedTodos, pendingTod
               <DashboardTabs notes={notes} todos={todos} />
            </div>
 
-           {/* Right Section: Quick Access or small stats */}
+           {/* Right Section: Quick Access or small stats (Desktop only) */}
            <div className="hidden lg:flex lg:col-span-4 flex-col gap-6 sticky top-8">
               {/* Subscription Button */}
               <SubscriptionButton currentPlan={userPlan} subscriptionStatus={subscriptionStatus} />
