@@ -62,8 +62,8 @@ export default function DashboardView({ notes, todos, completedTodos, pendingTod
            </div>
         </div>
 
-        {/* Mobile: Subscription Button */}
-        <div className="lg:hidden mb-8">
+        {/* Mobile: Subscription Button - Show on small screens */}
+        <div className="block lg:hidden mb-8">
           <SubscriptionButton currentPlan={userPlan} subscriptionStatus={subscriptionStatus} />
         </div>
 
