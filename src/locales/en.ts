@@ -65,6 +65,7 @@ export const en = {
     noWalletMobile: 'Wallet Not Available',
     openInMetaMask: 'Mobile browsers do not support wallet extensions. Open this page in the MetaMask app browser.',
     openMetaMask: 'Open in MetaMask',
+    redirectingToMetaMask: 'Redirecting to MetaMask...',
     connectionFailed: 'Connection Failed',
     connectCancelled: 'Connection Cancelled',
     vaultUnlocked: 'Web3 Vault Unlocked',

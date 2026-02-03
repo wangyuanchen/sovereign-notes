@@ -19,6 +19,12 @@ const isMetaMaskBrowser = () => {
   return (window as any).ethereum?.isMetaMask && isMobileDevice();
 };
 
+// Helper to check if we're on mobile but NOT in MetaMask browser (i.e., regular mobile browser)
+const isMobileSystemBrowser = () => {
+  if (typeof window === 'undefined') return false;
+  return isMobileDevice() && !(window as any).ethereum;
+};
+
 // Generate MetaMask deep link to open current page in MetaMask browser
 const getMetaMaskDeepLink = () => {
   if (typeof window === 'undefined') return '';
@@ -64,20 +70,20 @@ export function useWeb3Vault() {
   const connectWallet = async () => {
     setError(null);
     if (typeof window === 'undefined' || !(window as any).ethereum) {
-      // Check if on mobile - show different message and action
-      if (isMobileDevice()) {
-        toast.warning(t('web3.noWalletMobile'), {
+      // Check if on mobile system browser - directly redirect to MetaMask
+      if (isMobileSystemBrowser()) {
+        toast.info(t('web3.redirectingToMetaMask'), {
           description: t('web3.openInMetaMask'),
-          action: {
-            label: t('web3.openMetaMask'),
-            onClick: () => {
-              const deepLink = getMetaMaskDeepLink();
-              window.location.href = deepLink;
-            }
-          },
-          duration: 10000,
+          duration: 3000,
         });
-      } else {
+        // Small delay to let user see the toast, then redirect
+        setTimeout(() => {
+          const deepLink = getMetaMaskDeepLink();
+          window.location.href = deepLink;
+        }, 1000);
+        return null;
+      } else if (!isMobileDevice()) {
+        // Desktop without MetaMask
         toast.warning(t('web3.noWallet'), {
           description: t('web3.installMetaMask'),
           action: {
@@ -116,20 +122,18 @@ export function useWeb3Vault() {
   const deriveKeyFromSignature = async () => {
     setError(null);
     if (typeof window === 'undefined' || !(window as any).ethereum) {
-      // Check if on mobile - show different message and action
-      if (isMobileDevice()) {
-        toast.warning(t('web3.noWalletMobile'), {
+      // Check if on mobile system browser - directly redirect to MetaMask
+      if (isMobileSystemBrowser()) {
+        toast.info(t('web3.redirectingToMetaMask'), {
           description: t('web3.openInMetaMask'),
-          action: {
-            label: t('web3.openMetaMask'),
-            onClick: () => {
-              const deepLink = getMetaMaskDeepLink();
-              window.location.href = deepLink;
-            }
-          },
-          duration: 10000,
+          duration: 3000,
         });
-      } else {
+        setTimeout(() => {
+          const deepLink = getMetaMaskDeepLink();
+          window.location.href = deepLink;
+        }, 1000);
+        return null;
+      } else if (!isMobileDevice()) {
         toast.warning(t('web3.noWallet'), {
           description: t('web3.installMetaMask'),
           action: {
