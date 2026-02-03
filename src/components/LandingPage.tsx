@@ -1,13 +1,36 @@
 'use client';
 
-import React from 'react';
-import { Shield, Plus, CheckCircle2, Circle, Calendar } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Shield, Plus, CheckCircle2, Circle, Calendar, ExternalLink, Copy, Check } from 'lucide-react';
 import { UserButton, SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
 import Link from 'next/link';
 import { useTranslation } from '@/lib/i18n';
 
+// 检测是否在 MetaMask 内置浏览器中
+const isMetaMaskBrowser = () => {
+  if (typeof window === 'undefined') return false;
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  return (window as any).ethereum?.isMetaMask && isMobile;
+};
+
 export default function LandingPage() {
   const { t } = useTranslation();
+  const [inMetaMaskBrowser, setInMetaMaskBrowser] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    setInMetaMaskBrowser(isMetaMaskBrowser());
+  }, []);
+
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy:', err);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#09090b] text-zinc-100 p-6">
@@ -35,6 +58,39 @@ export default function LandingPage() {
       </div>
 
       <SignedOut>
+        {/* MetaMask Browser Warning */}
+        {inMetaMaskBrowser && (
+          <div className="max-w-4xl mx-auto mb-8 bg-amber-500/10 border border-amber-500/30 rounded-2xl p-6">
+            <div className="flex items-start gap-4">
+              <div className="w-10 h-10 bg-amber-500/20 text-amber-400 rounded-lg flex items-center justify-center flex-shrink-0">
+                <ExternalLink className="w-5 h-5" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-bold text-amber-400 mb-2">请在系统浏览器中打开</h3>
+                <p className="text-zinc-400 text-sm mb-4">
+                  Google 登录不支持在 MetaMask 内置浏览器中使用。请复制链接并在 Chrome 或 Safari 中打开来完成登录。
+                </p>
+                <button
+                  onClick={handleCopyLink}
+                  className="inline-flex items-center gap-2 bg-amber-500/20 hover:bg-amber-500/30 text-amber-400 px-4 py-2 rounded-lg font-medium transition"
+                >
+                  {copied ? (
+                    <>
+                      <Check className="w-4 h-4" />
+                      已复制!
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-4 h-4" />
+                      复制链接
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="max-w-4xl mx-auto text-center py-20">
           <h2 className="text-5xl font-bold mb-6">{t('home.subtitle')}</h2>
           <p className="text-xl text-zinc-400 mb-10">
