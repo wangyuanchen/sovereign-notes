@@ -1,9 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { BrowserProvider } from 'ethers';
 import { toast } from 'sonner';
 import { useTranslation } from '@/lib/i18n';
+import { useAppKit, useAppKitAccount, useAppKitProvider } from '@reown/appkit/react';
+import type { Provider } from '@reown/appkit-adapter-ethers';
 
 // Helper to detect mobile device
 const isMobileDevice = () => {
@@ -19,40 +21,20 @@ const isMetaMaskBrowser = () => {
   return (window as any).ethereum?.isMetaMask && isMobileDevice();
 };
 
-// Helper to check if we're on mobile but NOT in MetaMask browser (i.e., regular mobile browser)
-const isMobileSystemBrowser = () => {
-  if (typeof window === 'undefined') return false;
-  return isMobileDevice() && !(window as any).ethereum;
-};
-
-// Generate MetaMask deep link to open current page in MetaMask browser
-const getMetaMaskDeepLink = () => {
-  if (typeof window === 'undefined') return '';
-  const currentUrl = window.location.href;
-  // MetaMask deep link format: https://metamask.app.link/dapp/{url without protocol}
-  const urlWithoutProtocol = currentUrl.replace(/^https?:\/\//, '');
-  return `https://metamask.app.link/dapp/${urlWithoutProtocol}`;
-};
-
 export function useWeb3Vault() {
-  const [walletAddress, setWalletAddress] = useState<string | null>(null);
   const [vaultKey, setVaultKey] = useState<string | null>(null);
   const [isReady, setIsReady] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { t } = useTranslation();
 
-  // Helper to safely get provider
-  const getProvider = () => {
-    if (typeof window !== 'undefined' && (window as any).ethereum) {
-      return new BrowserProvider((window as any).ethereum);
-    }
-    return null;
-  };
+  // AppKit hooks
+  const { open } = useAppKit();
+  const { address, isConnected } = useAppKitAccount();
+  const { walletProvider } = useAppKitProvider<Provider>('eip155');
 
   // 初始化检查
   useEffect(() => {
-    // 检测移动设备
     setIsMobile(isMobileDevice());
     
     // 检查是否有缓存的 Key (Session级别)
@@ -61,94 +43,43 @@ export function useWeb3Vault() {
       setVaultKey(cachedKey);
     }
     
-    // 检查是否有 ethereum 对象
-    if (typeof window !== 'undefined' && (window as any).ethereum) {
-      setIsReady(true);
-    }
+    setIsReady(true);
   }, []);
 
-  const connectWallet = async () => {
+  // 连接钱包 - 使用 WalletConnect Modal
+  const connectWallet = useCallback(async () => {
     setError(null);
-    if (typeof window === 'undefined' || !(window as any).ethereum) {
-      // Check if on mobile system browser - directly redirect to MetaMask
-      if (isMobileSystemBrowser()) {
-        toast.info(t('web3.redirectingToMetaMask'), {
-          description: t('web3.openInMetaMask'),
-          duration: 3000,
-        });
-        // Small delay to let user see the toast, then redirect
-        setTimeout(() => {
-          const deepLink = getMetaMaskDeepLink();
-          window.location.href = deepLink;
-        }, 1000);
-        return null;
-      } else if (!isMobileDevice()) {
-        // Desktop without MetaMask
-        toast.warning(t('web3.noWallet'), {
-          description: t('web3.installMetaMask'),
-          action: {
-            label: t('web3.download'),
-            onClick: () => window.open('https://metamask.io/download/', '_blank')
-          },
-          duration: 8000,
-        });
-      }
-      return null;
-    }
-
+    
     try {
-      const provider = getProvider();
-      if (!provider) throw new Error("Could not initialize provider");
-
-      const accounts = await provider.send("eth_requestAccounts", []);
-      if (accounts.length > 0) {
-        setWalletAddress(accounts[0]);
-        return accounts[0];
-      }
+      // 打开 WalletConnect Modal
+      await open();
+      return address || null;
     } catch (err: any) {
       console.error("Wallet connection error:", err);
-      // specific handling for user rejection
       if (err.code === 4001) {
-         toast.info(t('web3.connectCancelled'));
-         return null;
+        toast.info(t('web3.connectCancelled'));
+        return null;
       }
       const msg = err.message || t('web3.connectionFailed');
       setError(msg);
       toast.error(t('web3.connectionFailed'), { description: "Unable to connect wallet, please retry." });
+      return null;
     }
-    return null;
-  };
+  }, [open, address, t]);
 
-  const deriveKeyFromSignature = async () => {
+  // 从签名派生密钥
+  const deriveKeyFromSignature = useCallback(async () => {
     setError(null);
-    if (typeof window === 'undefined' || !(window as any).ethereum) {
-      // Check if on mobile system browser - directly redirect to MetaMask
-      if (isMobileSystemBrowser()) {
-        toast.info(t('web3.redirectingToMetaMask'), {
-          description: t('web3.openInMetaMask'),
-          duration: 3000,
-        });
-        setTimeout(() => {
-          const deepLink = getMetaMaskDeepLink();
-          window.location.href = deepLink;
-        }, 1000);
-        return null;
-      } else if (!isMobileDevice()) {
-        toast.warning(t('web3.noWallet'), {
-          description: t('web3.installMetaMask'),
-          action: {
-            label: t('web3.download'),
-            onClick: () => window.open('https://metamask.io/download/', '_blank')
-          }
-        });
-      }
+    
+    // 如果未连接，先打开连接弹窗
+    if (!isConnected || !walletProvider) {
+      toast.info(t('web3.connectFirst'));
+      await open();
       return null;
     }
 
     try {
-      const provider = getProvider();
-      if (!provider) throw new Error("Could not initialize provider");
-
+      const provider = new BrowserProvider(walletProvider);
       const signer = await provider.getSigner();
       
       // 这是一个固定的签名消息，用于生成确定性的密钥
@@ -158,7 +89,6 @@ export function useWeb3Vault() {
       const signature = await signer.signMessage(message);
       
       // 使用签名作为派生密钥的源
-      // 签名对同一个钱包和同一个消息是固定的，长且随机，非常适合做主密钥
       setVaultKey(signature);
       sessionStorage.setItem('sovereign_vault_key', signature);
       toast.success(t('web3.vaultUnlocked'), { description: t('web3.vaultUnlockedDesc') });
@@ -170,26 +100,24 @@ export function useWeb3Vault() {
       toast.error(t('web3.signatureFailed'), { description: t('web3.signatureFailedDesc') });
       return null;
     }
-  };
+  }, [isConnected, walletProvider, open, t]);
 
-  const clearKey = () => {
+  const clearKey = useCallback(() => {
     setVaultKey(null);
     sessionStorage.removeItem('sovereign_vault_key');
     toast.info(t('web3.disconnected'), { description: t('web3.sessionEnded') });
-  };
+  }, [t]);
 
   return {
     isReady,
     isMobile,
-    walletAddress,
+    isConnected,
+    walletAddress: address || null,
     vaultKey,
     error,
     connectWallet,
     deriveKeyFromSignature,
     clearKey,
-    openInMetaMask: () => {
-      const deepLink = getMetaMaskDeepLink();
-      window.location.href = deepLink;
-    }
+    openWalletModal: () => open(),
   };
 }
