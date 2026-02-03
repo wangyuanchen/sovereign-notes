@@ -69,6 +69,8 @@ export const en = {
     connectFirst: 'Please connect your wallet first',
     connectionFailed: 'Connection Failed',
     connectCancelled: 'Connection Cancelled',
+    walletConnected: 'Wallet Connected',
+    signatureCancelled: 'Signature Cancelled',
     vaultUnlocked: 'Web3 Vault Unlocked',
     vaultUnlockedDesc: 'Your notes are now end-to-end encrypted.',
     signatureFailed: 'Signature Verification Failed',
