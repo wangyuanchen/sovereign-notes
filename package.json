@@ -20,6 +20,7 @@
   "dependencies": {
     "@ai-sdk/openai": "^3.0.12",
     "@clerk/nextjs": "^6.7.3",
+    "@neondatabase/serverless": "^1.0.2",
     "@solana/kit": "^5.5.1",
     "@solana/web3.js": "^1.98.4",
     "@tailwindcss/typography": "^0.5.19",
@@ -35,7 +36,6 @@
     "ethers": "^6.16.0",
     "lucide-react": "^0.562.0",
     "next": "^16.1.4",
-    "postgres": "^3.4.5",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
     "react-markdown": "^10.1.0",

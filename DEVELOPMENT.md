@@ -58,7 +58,7 @@ npm install better-sqlite3 @types/better-sqlite3
    - Sign-up URL: `http://localhost:3000/sign-up`
    - After sign-in: `http://localhost:3000`
 
-### 2. 配置 PostgreSQL
+### 2. 配置数据库（推荐 Neon）
 
 #### 选项 A: 本地 PostgreSQL
 
@@ -74,18 +74,12 @@ createdb sovereign_notes
 DATABASE_URL=postgresql://localhost:5432/sovereign_notes
 ```
 
-#### 选项 B: 使用 Neon (免费云数据库)
+#### 选项 B: 使用 Neon（推荐，免费云数据库）
 
 1. 访问 [neon.tech](https://neon.tech)
 2. 创建免费项目
 3. 复制连接字符串到 `.env.local`
-
-#### 选项 C: 使用 Supabase (免费云数据库)
-
-1. 访问 [supabase.com](https://supabase.com)
-2. 创建新项目
-3. 获取 PostgreSQL 连接字符串
-4. 更新 `.env.local`
+4. 确保包含 `sslmode=require`（Neon 连接通常默认已带上）
 
 ### 3. 初始化数据库
 

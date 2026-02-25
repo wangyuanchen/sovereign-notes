@@ -99,7 +99,7 @@ npm run dev
 A: 可以，使用方案 2 临时禁用认证。但生产环境必须配置。
 
 **Q: 数据库连接失败？**
-A: 确保 PostgreSQL 正在运行，或使用 Neon 等云服务。
+A: 优先检查 `DATABASE_URL` 是否为 Neon 提供的完整连接串（通常包含 `sslmode=require`）；若使用本地 PostgreSQL，请确认服务已启动。
 
 **Q: 端口 3000 被占用？**
 A: 使用 `npm run dev -- -p 3001` 指定其他端口。
