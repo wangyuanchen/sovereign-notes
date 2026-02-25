@@ -55,7 +55,7 @@ A privacy-first personal notes and todo app with Web3 wallet support.
 | Framework | Next.js 16 (App Router) |
 | Language | TypeScript |
 | Auth | Clerk + Web3Auth |
-| Database | PostgreSQL + Drizzle ORM |
+| Database | Neon Postgres + Drizzle ORM |
 | UI | Tailwind CSS + Lucide Icons |
 | Editor | Tiptap + Markdown |
 | Web3 | ethers.js |
@@ -152,7 +152,7 @@ This project is licensed under **AGPL-3.0** — if you use this code to run a co
 | 框架 | Next.js 16 (App Router) |
 | 语言 | TypeScript |
 | 认证 | Clerk + Web3Auth |
-| 数据库 | PostgreSQL + Drizzle ORM |
+| 数据库 | Neon Postgres + Drizzle ORM |
 | UI | Tailwind CSS + Lucide Icons |
 | 编辑器 | Tiptap + Markdown |
 | Web3 | ethers.js |

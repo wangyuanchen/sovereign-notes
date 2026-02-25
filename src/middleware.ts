@@ -16,8 +16,7 @@ const isProtectedRoute = createRouteMatcher([
 const isPublicRoute = createRouteMatcher([
   '/sign-in(.*)',
   '/sign-up(.*)',
-  '/api/webhook(.*)',
-  '/api/keep-alive'
+  '/api/webhook(.*)'
 ]);
 
 // Stripe webhook 需要完全跳过 middleware，保持原始 body

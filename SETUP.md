@@ -22,14 +22,14 @@ cp .env.example .env.local
 
 需要配置的服务：
 
-- **数据库**: PostgreSQL 数据库连接字符串
+- **数据库**: PostgreSQL 连接字符串（推荐使用 Neon）
 - **Clerk**: 在 [clerk.com](https://clerk.com) 创建应用获取密钥
 - **Stripe** (可选): 在 [stripe.com](https://stripe.com) 获取 API 密钥
 - **OpenAI** (可选): 在 [openai.com](https://openai.com) 获取 API 密钥
 
 ### 3. 设置数据库
 
-确保你有一个运行中的 PostgreSQL 数据库，然后运行：
+建议先在 Neon 创建免费数据库并获取连接字符串，填入 `.env.local` 的 `DATABASE_URL`，然后运行：
 
 ```bash
 # 生成数据库迁移文件
@@ -89,6 +89,6 @@ vercel
 
 ## 注意事项
 
-- 确保 PostgreSQL 数据库正在运行
+- 优先使用 Neon 连接串；本地 PostgreSQL 也可用
 - Clerk 需要配置回调 URL: `http://localhost:3000`
 - 生产环境需要配置正确的域名和 HTTPS
