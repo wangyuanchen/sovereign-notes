@@ -9,6 +9,18 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Sovereign Notes | Web3 Privacy First",
   description: "Your notes, always yours. A Web3 privacy-first note-taking tool.",
+  openGraph: {
+    title: "Sovereign Notes | Web3 Privacy First",
+    description: "Your notes, always yours. A Web3 privacy-first note-taking tool.",
+    locale: "en_US",
+    type: "website",
+    siteName: "Sovereign Notes",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Sovereign Notes | Web3 Privacy First",
+    description: "Your notes, always yours. A Web3 privacy-first note-taking tool.",
+  },
 };
 
 export default function RootLayout({

@@ -66,9 +66,9 @@ export default function LandingPage() {
                 <ExternalLink className="w-5 h-5" />
               </div>
               <div className="flex-1">
-                <h3 className="font-bold text-amber-400 mb-2">请在系统浏览器中打开</h3>
+                <h3 className="font-bold text-amber-400 mb-2">{t('home.metamaskBrowserTitle')}</h3>
                 <p className="text-zinc-400 text-sm mb-4">
-                  Google 登录不支持在 MetaMask 内置浏览器中使用。请复制链接并在 Chrome 或 Safari 中打开来完成登录。
+                  {t('home.metamaskBrowserDesc')}
                 </p>
                 <button
                   onClick={handleCopyLink}
@@ -77,12 +77,12 @@ export default function LandingPage() {
                   {copied ? (
                     <>
                       <Check className="w-4 h-4" />
-                      已复制!
+                      {t('home.copiedLink')}
                     </>
                   ) : (
                     <>
                       <Copy className="w-4 h-4" />
-                      复制链接
+                      {t('home.copyLink')}
                     </>
                   )}
                 </button>
